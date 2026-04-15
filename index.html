@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Sussurro Morto – Protótipo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #050509;
+      color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .game {
+      width: 900px;
+      max-width: 100%;
+      background: #11131a;
+      border: 2px solid #333;
+      box-shadow: 0 0 20px #000;
+      display: grid;
+      grid-template-columns: 2fr 1.2fr;
+      gap: 0;
+    }
+    .left, .right {
+      padding: 16px;
+      border-left: 1px solid #222;
+    }
+    .left { border-left: none; border-right: 1px solid #222; }
+
+    h1 {
+      font-size: 20px;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 12px;
+    }
+
+    /* PC */
+    .pc {
+      background: #05060a;
+      border: 1px solid #333;
+      padding: 10px;
+      margin-bottom: 12px;
+    }
+    .pc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      margin-bottom: 8px;
+      color: #bbb;
+    }
+    .pc-screen {
+      background: #020308;
+      border: 1px solid #222;
+      height: 180px;
+      padding: 8px;
+      overflow-y: auto;
+      font-size: 13px;
+    }
+    .pc-apps {
+      margin-top: 8px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #1b1f2b;
+      color: #f5f5f5;
+      border: 1px solid #444;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    button:hover {
+      background: #252a3a;
+    }
+    button:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    /* Sala / casa */
+    .house {
+      margin-top: 10px;
+      border: 1px solid #333;
+      padding: 10px;
+      background: #0b0d13;
+    }
+    .house-rooms {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .room-label {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 4px;
+    }
+    .log {
+      margin-top: 8px;
+      background: #05060a;
+      border: 1px solid #222;
+      padding: 8px;
+      height: 120px;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+    .log p { margin-bottom: 4px; }
+
+    /* Painel de história */
+    .right h2 {
+      font-size: 16px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .story {
+      font-size: 13px;
+      line-height: 1.4;
+      margin-bottom: 10px;
+      min-height: 120px;
+      white-space: pre-line;
+    }
+    .choices {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .status {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #aaa;
+    }
+    .highlight {
+      color: #ff4b4b;
+    }
+    .safe {
+      color: #6fdc6f;
+    }
+  </style>
+</head>
+<body>
+<div class="game">
+  <div class="left">
+    <h1>Sussurro Morto</h1>
+    <div class="subtitle">Protótipo – PC, casa e ciclo de perseguição</div>
+
+    <!-- PC -->
+    <div class="pc">
+      <div class="pc-header">
+        <span>PC – Área de Trabalho</span>
+        <span id="pc-status">Online</span>
+      </div>
+      <div class="pc-screen" id="pc-screen">
+        <p>O ecrã brilha numa sala quase às escuras.</p>
+        <p>Consegues sentir que não estás totalmente sozinho.</p>
+      </div>
+      <div class="pc-apps">
+        <button onclick="pcAction('mensagem')">Mensagens</button>
+        <button onclick="pcAction('jogar')">Jogar</button>
+        <button onclick="pcAction('falar')">Chamada</button>
+      </div>
+    </div>
+
+    <!-- Casa / divisões -->
+    <div class="house">
+      <div class="room-label">Divisões da casa</div>
+      <div class="house-rooms">
+        <button onclick="changeRoom('sala')">Sala</button>
+        <button onclick="changeRoom('cozinha')">Cozinha</button>
+        <button onclick="changeRoom('quarto')">Quarto</button>
+      </div>
+      <div class="log" id="house-log">
+        <p>Estás na sala, o PC está ligado. A casa está silenciosa.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="right">
+    <h2>História</h2>
+    <div class="story" id="story">
+      É só mais uma noite normal.
+
+      Estás no PC, a saltar entre mensagens, jogos e chamadas.
+      Podes andar pela casa: sala, cozinha, quarto.
+
+      Em algum momento… alguém vai bater à porta.
+    </div>
+
+    <div class="choices" id="choices">
+      <button onclick="startKnock()">Avançar a noite</button>
+    </div>
+
+    <div class="status" id="status">
+      Estado: <span>À espera de algo acontecer…</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentRoom = 'sala';
+  let knockStarted = false;
+  let hidingPhase = false;
+
+  const pcScreen = document.getElementById('pc-screen');
+  const houseLog = document.getElementById('house-log');
+  const story = document.getElementById('story');
+  const choices = document.getElementById('choices');
+  const statusEl = document.getElementById('status').querySelector('span');
+
+  function logPc(text) {
+    pcScreen.innerHTML += `<p>${text}</p>`;
+    pcScreen.scrollTop = pcScreen.scrollHeight;
+  }
+
+  function logHouse(text) {
+    houseLog.innerHTML += `<p>${text}</p>`;
+    houseLog.scrollTop = houseLog.scrollHeight;
+  }
+
+  function pcAction(type) {
+    if (hidingPhase) {
+      logPc('Agora não é altura para isso. Há alguém na casa.');
+      return;
+    }
+    if (type === 'mensagem') {
+      logPc('Abres a app de mensagens. Ninguém responde. Última mensagem tua: "Acho que ouvi algo na escada."');
+    } else if (type === 'jogar') {
+      logPc('Tentaste jogar, mas o som de passos no corredor não te deixa concentrar.');
+    } else if (type === 'falar') {
+      logPc('Inicias uma chamada. A ligação cai assim que alguém bate à porta.');
+      if (!knockStarted) startKnock();
+    }
+  }
+
+  function changeRoom(room) {
+    currentRoom = room;
+    if (room === 'sala') {
+      logHouse('Vais para a sala. O PC continua ligado, a luz azul corta a escuridão.');
+    } else if (room === 'cozinha') {
+      logHouse('Vais para a cozinha. O frigorífico faz um zumbido baixo. A casa parece vazia… demais.');
+    } else if (room === 'quarto') {
+      logHouse('Vais para o quarto. A cama, o armário e a janela fechada esperam em silêncio.');
+    }
+  }
+
+  function startKnock() {
+    knockStarted = true;
+    hidingPhase = false;
+    story.textContent =
+`Um som seco ecoa pela casa.
+
+Alguém bate à porta.
+
+O ar fica pesado. O PC continua ligado na sala, mas o som vem do corredor.
+
+Instintivamente, decides ir para o quarto.`;
+    changeRoom('quarto');
+    statusEl.textContent = 'Alguém está à porta…';
+    renderHidingChoices();
+  }
+
+  function renderHidingChoices() {
+    hidingPhase = true;
+    choices.innerHTML = '';
+    const btnArmario = document.createElement('button');
+    btnArmario.textContent = 'Esconder no armário';
+    btnArmario.onclick = () => resolveHiding('armario');
+
+    const btnCama = document.createElement('button');
+    btnCama.textContent = 'Esconder debaixo da cama';
+    btnCama.onclick = () => resolveHiding('cama');
+
+    choices.appendChild(btnArmario);
+    choices.appendChild(btnCama);
+  }
+
+  function resolveHiding(local) {
+    if (local === 'armario') {
+      story.textContent =
+`Corres para o armário e fechas a porta com cuidado.
+
+Os passos aproximam-se. O chão range mesmo à frente do quarto.
+
+A maçaneta roda devagar… mas a porta não abre.
+
+Depois de alguns segundos que parecem horas, o som afasta-se.
+
+Sobrevives. Por agora.
+
+A noite recomeça.`;
+      statusEl.innerHTML = '<span class="safe">Sobreviveste. O ciclo repete.</span>';
+    } else {
+      story.textContent =
+`Atiras-te para debaixo da cama, a respiração presa na garganta.
+
+Os passos entram no quarto. Vês apenas pés imóveis ao lado da cama.
+
+O silêncio dura tempo demais.
+
+A colcha levanta devagar.
+
+Não tiveste tempo de reagir.
+
+A cena repete.`;
+      statusEl.innerHTML = '<span class="highlight">Foste encontrado. O ciclo recomeça.</span>';
+    }
+
+    // Reiniciar ciclo
+    choices.innerHTML = '';
+    const restartBtn = document.createElement('button');
+    restartBtn.textContent = 'Repetir noite';
+    restartBtn.onclick = resetNight;
+    choices.appendChild(restartBtn);
+
+    knockStarted = false;
+    hidingPhase = false;
+  }
+
+  function resetNight() {
+    story.textContent =
+`É outra vez a mesma noite.
+
+O PC está ligado na sala.
+Podes mexer no PC, andar pela casa…
+
+Mas sabes que, mais cedo ou mais tarde, alguém vai bater à porta.`;
+    statusEl.textContent = 'À espera de algo acontecer…';
+    choices.innerHTML = '';
+    const btn = document.createElement('button');
+    btn.textContent = 'Avançar a noite';
+    btn.onclick = startKnock;
+    choices.appendChild(btn);
+
+    currentRoom = 'sala';
+    houseLog.innerHTML = '<p>Estás na sala, o PC está ligado. A casa está silenciosa.</p>';
+    pcScreen.innerHTML = '<p>O ecrã brilha numa sala quase às escuras.</p><p>Consegues sentir que não estás totalmente sozinho.</p>';
+  }
+</script>
+</body>
+</html>
