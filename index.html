@@ -2,327 +2,387 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ERROR_LOG_1978</title>
+    <title>SISTEMA CRÍTICO - 1978</title>
     <style>
+        :root {
+            --monitor-glow: rgba(0, 255, 0, 0.05);
+            --phone-bg: #050505;
+        }
+
         body {
-            background-color: #1a1a1a;
-            color: white;
-            font-family: 'Courier New', Courier, monospace;
+            background-color: #0a0a0a;
+            color: #d1d1d1;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
             overflow: hidden;
+            perspective: 1000px;
         }
 
-        #game-container {
+        /* AMBIENTE MESA */
+        #desk {
             position: relative;
-            width: 800px;
-            height: 500px;
-            background: #000;
-            border: 10px solid #333;
-            border-radius: 10px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            width: 1000px;
+            height: 600px;
+            background: #121212;
+            border-bottom: 20px solid #080808;
+            box-shadow: inset 0 0 100px #000;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 40px;
         }
 
-        /* PC SCREEN */
-        #pc-screen {
+        /* MONITOR REALISTA */
+        #monitor {
+            width: 700px;
+            height: 450px;
+            background: #111;
+            border: 15px solid #222;
+            border-radius: 10px;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,1), 0 0 10px rgba(255,255,255,0.05);
+            overflow: hidden;
+        }
+
+        #screen {
             width: 100%;
             height: 100%;
-            background: url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=800') center;
-            background-size: cover;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+            background: #000;
+            position: relative;
+            overflow: hidden;
         }
 
-        .blue-screen {
-            background: #0000aa !important;
-            color: white;
-            padding: 20px;
-            display: none;
+        /* EFEITO DE SCANLINES (TV ANTIGA/MONITOR) */
+        #screen::after {
+            content: " ";
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 10;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
+            z-index: 5;
         }
 
-        /* SMARTPHONE */
-        #phone {
+        /* TELEMÓVEL */
+        #smartphone {
             position: absolute;
-            bottom: -250px;
+            bottom: 20px;
             right: 50px;
-            width: 180px;
-            height: 320px;
+            width: 160px;
+            height: 280px;
             background: #111;
-            border: 4px solid #444;
-            border-top-width: 15px;
-            border-bottom-width: 15px;
             border-radius: 20px;
-            transition: all 0.5s ease;
+            border: 4px solid #333;
+            box-shadow: 5px 10px 20px rgba(0,0,0,0.8);
+            transform: rotate(-5deg);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: none;
-            z-index: 20;
+            z-index: 100;
+            cursor: pointer;
+        }
+
+        #smartphone.active { display: block; }
+        #smartphone.on-hand { transform: rotate(0deg) scale(1.4) translateY(-100px); right: 40%; }
+        #smartphone.dropped { transform: translateY(600px) rotate(45deg); opacity: 0; }
+
+        #phone-screen {
+            margin: 15px 8px;
+            height: calc(100% - 30px);
+            background: var(--phone-bg);
+            border-radius: 10px;
             padding: 10px;
             box-sizing: border-box;
-            color: #0f0;
             font-size: 12px;
+            color: #fff;
         }
 
-        #phone.active { bottom: 20px; display: block; }
-        #phone.dropped { transform: translateY(500px) rotate(20deg); }
-
-        /* INPUTS */
-        input {
-            background: #222;
-            border: 1px solid #444;
-            color: #0f0;
-            padding: 5px;
-            width: 80%;
-            margin-top: 10px;
-            text-align: center;
-        }
-
-        .btn {
-            background: #444;
-            color: white;
-            padding: 5px 10px;
-            cursor: pointer;
-            margin-top: 5px;
-            border: none;
-        }
-
-        .btn:hover { background: #666; }
-
-        /* DECORATION */
+        /* OBJETOS NA MESA */
         #sticker {
             position: absolute;
-            bottom: 5px;
-            left: 5px;
-            background: #ddd;
+            bottom: -10px;
+            left: 20px;
+            background: #e2e2e2;
             color: #333;
-            padding: 2px 5px;
-            font-size: 10px;
-            transform: rotate(-5deg);
+            padding: 4px 8px;
+            font-weight: bold;
+            font-size: 12px;
+            transform: rotate(2deg);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
             display: none;
+            font-family: sans-serif;
         }
 
         #id-card {
             position: absolute;
-            bottom: 10px;
-            left: 100px;
-            background: #fff;
-            color: #000;
+            bottom: -5px;
+            left: 140px;
+            width: 100px;
+            height: 60px;
+            background: linear-gradient(135deg, #fff, #f0f0f0);
+            border-radius: 5px;
+            color: #111;
+            font-size: 8px;
             padding: 5px;
-            font-size: 9px;
-            width: 80px;
-            border-radius: 3px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
             display: none;
         }
 
-        /* SCARY STUFF */
+        /* CONTEÚDO DO PC */
+        .game-playing {
+            width: 100%; height: 100%;
+            background: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=800') center;
+            background-size: cover;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .bsod {
+            background: #003fa1;
+            width: 100%; height: 100%;
+            padding: 40px;
+            box-sizing: border-box;
+            display: none;
+        }
+
+        .desktop {
+            background: #1a1a1a;
+            width: 100%; height: 100%;
+            display: none;
+            padding: 20px;
+        }
+
+        .icon {
+            width: 60px; text-align: center; cursor: pointer;
+        }
+        .icon img { width: 50px; filter: grayscale(1); }
+
+        /* INTERAÇÃO */
+        input {
+            background: #222; border: 1px solid #444; color: #0f0;
+            width: 100%; margin: 10px 0; padding: 5px; box-sizing: border-box;
+        }
+        button {
+            width: 100%; background: #333; color: #eee; border: none; padding: 8px; cursor: pointer;
+        }
+        button:hover { background: #444; }
+
+        /* FINAL */
         #jumpscare {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: black;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: #000; z-index: 1000; display: none;
+            justify-content: center; align-items: center;
         }
+        #jumpscare img { width: 100%; height: 100%; object-fit: cover; }
 
-        #jumpscare img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .red-file { color: red; font-weight: bold; cursor: pointer; }
+        .red-text { color: #ff0000; text-shadow: 0 0 5px red; cursor: pointer; }
         
-        .error-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,0,0,0.2);
-            display: none;
-            pointer-events: none;
+        .glitch { animation: shake 0.1s infinite; }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            50% { transform: translate(-1px, -2px) rotate(-1deg); }
+            100% { transform: translate(1px, 2px) rotate(1deg); }
         }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <div id="pc-screen">
-        <div id="game-ui">
-            <h2>MEU JOGO FAVORITO</h2>
-            <p>Pontuação: 12500</p>
-            <button class="btn" onclick="triggerCrash()">JOGAR</button>
-        </div>
-
-        <div id="blue-screen" class="blue-screen">
-            <h1>:(</h1>
-            <p>Ocorreu um erro crítico no sistema.</p>
-            <p>Se contactar o suporte, forneça este código: <br><strong>ERRO_SEC_1122</strong></p>
-        </div>
-
-        <div id="pc-desktop" style="display:none; width:100%; height:100%; background: #2c3e50; position:relative;">
-            <div id="app-icon" style="padding:20px; cursor:pointer;" onclick="openSecretApp()">
-                <div style="width:40px; height:40px; background:white; margin-bottom:5px;"></div>
-                <span>Não Entrar</span>
-            </div>
-            
-            <div id="secret-app" style="display:none; background:#000; border:2px solid #fff; width:300px; margin: 50px auto; padding:20px;">
-                <p>ACESSO BLOQUEADO</p>
-                <input type="text" id="pc-pass-2" placeholder="Ano de Nascimento">
-                <button class="btn" onclick="checkBirthYear()">ENTRAR</button>
+<div id="desk">
+    <div id="monitor">
+        <div id="screen">
+            <div id="game-layer" class="game-playing">
+                <button style="width: auto;" onclick="crashPC()">JOGAR JOGO FAVORITO</button>
             </div>
 
-            <div id="files-list" style="display:none; padding:20px;">
-                <p>Lista de Ficheiros:</p>
-                <ul>
-                    <li>foto_ferias.jpg</li>
-                    <li>notas.txt</li>
-                    <li class="red-file" onclick="openGolpes()">GOLPES.exe</li>
-                </ul>
-                <div style="position:absolute; bottom:5px; width:100%; font-size:10px; color:#aaa; text-align:center;">
-                    v1.0 - Created 1995
+            <div id="bsod-layer" class="bsod">
+                <h1 style="font-size: 60px;">:(</h1>
+                <p>Ocorreu um erro crítico no seu PC.</p>
+                <p>O sistema será reiniciado após a recolha de dados.</p>
+                <p style="margin-top: 100px; font-size: 14px; opacity: 0.8;">
+                    Código de erro: 0x0000<span style="background: white; color: #003fa1;">1122</span>_FATAL_ERROR
+                </p>
+            </div>
+
+            <div id="desktop-layer" class="desktop">
+                <div id="admin-login" style="width: 200px; margin: 100px auto;">
+                    <p style="font-size: 12px;">SISTEMA BLOQUEADO</p>
+                    <input type="password" id="pc-code" placeholder="Código Admin">
+                    <button onclick="checkPCCode()">DESBLOQUEAR</button>
+                </div>
+
+                <div id="pc-icons" style="display:none;">
+                    <div class="icon" onclick="openApp()">
+                        <img src="https://cdn-icons-png.flaticon.com/512/564/564419.png">
+                        <span style="font-size: 10px;">NÃO ENTRAR</span>
+                    </div>
+                </div>
+
+                <div id="app-window" style="display:none; background: #000; border: 1px solid #555; padding: 20px; width: 350px; margin: 20px auto; position: relative;">
+                    <div id="app-lock">
+                        <p>Ficheiros Encriptados. Validação necessária.</p>
+                        <input type="text" id="birth-year" placeholder="Ano de Nascimento (Titular)">
+                        <button onclick="checkBirth()">VALIDAR</button>
+                    </div>
+                    <div id="app-files" style="display:none;">
+                        <p>Arquivos Encontrados:</p>
+                        <ul style="list-style: none; padding: 0;">
+                            <li>📄 system_log.dat</li>
+                            <li class="red-text" onclick="openGolpes()">📂 GOLPES [ROOT]</li>
+                        </ul>
+                    </div>
+                    <div id="footer" style="position: absolute; bottom: 5px; right: 10px; font-size: 9px; color: #444;">
+                        Build: v0.9 - Est. 1995
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="sticker">S/N: 4055</div>
-    <div id="id-card"><b>ID CARD</b><br>Nasc: 1978</div>
+    <div id="sticker">REF: 4055</div>
+    <div id="id-card">
+        <b>REPÚBLICA</b><br>
+        Nome: Protagonista<br>
+        Nasc: 1978<br>
+        <div style="width:20px; height:20px; background:#ccc; margin-top:5px;"></div>
+    </div>
 
-    <div id="phone">
-        <div id="phone-content">
-            <p>Telemóvel Bloqueado</p>
-            <input type="password" id="phone-pass" placeholder="PIN">
-            <button class="btn" onclick="unlockPhone()">OK</button>
+    <div id="smartphone" onclick="zoomPhone()">
+        <div id="phone-screen">
+            <div id="phone-lock">
+                <p style="text-align:center; margin-top:50px;">🔒 BLOQUEADO</p>
+                <input type="password" id="pin" placeholder="PIN" style="border-radius: 10px;">
+                <button onclick="unlockPhone(event)" style="border-radius: 10px;">OK</button>
+            </div>
+            <div id="phone-apps" style="display:none;">
+                <p id="chat-box" style="background:#222; padding:5px; min-height:50px; border-radius:5px;"></p>
+                <div id="game-mobile" style="display:none; text-align:center;">
+                    <hr>
+                    <p>SUPER GAME MOBILE</p>
+                    <p id="clock">00:00</p>
+                    <input type="password" id="game-pass" placeholder="Password do Jogo">
+                    <button onclick="playMobile(event)">PLAY</button>
+                </div>
+            </div>
         </div>
     </div>
-    
-    <div id="error-overlay" class="error-overlay"></div>
 </div>
 
 <div id="jumpscare">
-    <img src="https://i.imgur.com/vH3C3uV.jpg" alt="Scary face"> </div>
+    <img id="scary-img" src="https://i.imgur.com/vH3C3uV.jpg">
+</div>
 
 <script>
-    const pcScreen = document.getElementById('pc-screen');
-    const blueScreen = document.getElementById('blue-screen');
-    const phone = document.getElementById('phone');
-    const sticker = document.getElementById('sticker');
-    const idCard = document.getElementById('id-card');
-    const pcDesktop = document.getElementById('pc-desktop');
-
-    // 1. O JOGO TRAVA
-    function triggerCrash() {
-        document.getElementById('game-ui').style.display = 'none';
-        blueScreen.style.display = 'block';
+    const smartphone = document.getElementById('smartphone');
+    const phoneScreen = document.getElementById('phone-screen');
+    
+    // PC TRAVA
+    function crashPC() {
+        document.getElementById('game-layer').style.display = 'none';
+        document.getElementById('bsod-layer').style.display = 'block';
         setTimeout(() => {
-            phone.classList.add('active');
-            alert("O PC travou... que estranho. Vou ver o telemóvel.");
+            smartphone.classList.add('active');
+            alert("O PC travou... que estranho. O que é aquele número no erro?");
         }, 1500);
     }
 
-    // 2. DESBLOQUEAR TELEMÓVEL (CÓDIGO 1122)
-    function unlockPhone() {
-        const pass = document.getElementById('phone-pass').value;
-        if(pass === "1122") {
-            phoneContent("A enviar mensagem ao Amigo...");
-            setTimeout(() => {
-                phoneContent("Erro: Utilizador Indisponível. <br>A desinstalar 'Mensagens'...");
-                setTimeout(() => {
-                    phoneContent("Abrir Jogo Mobile? <br><input id='phone-pass-2' placeholder='Pass do Jogo'><button onclick='unlockMobileGame()'>OK</button>");
-                    alert("A app de mensagens desapareceu! Deixa-me ver os contactos para ver se há pistas.");
-                }, 2000);
-            }, 2000);
-        } else {
-            alert("PIN Incorreto");
+    // INTERAÇÃO TELEMÓVEL
+    function zoomPhone() {
+        if (!smartphone.classList.contains('dropped')) {
+            smartphone.classList.toggle('on-hand');
         }
     }
 
-    // 3. CONTACTOS (CÓDIGO 0105)
-    function unlockMobileGame() {
-        const pass = document.getElementById('phone-pass-2').value;
-        if(pass === "0105") {
-            phoneContent("A jogar... <br> 00:00 <br> [||||||||  ]");
-            runClock();
-        } else {
-            alert("Passcode do jogo errada. Dica: Veja os contactos.");
-            phoneContent("Contactos: <br>Mãe: 912...<br>Desconhecido: 0105");
+    function unlockPhone(e) {
+        e.stopPropagation();
+        const pin = document.getElementById('pin').value;
+        if (pin === "1122") {
+            document.getElementById('phone-lock').style.display = 'none';
+            document.getElementById('phone-apps').style.display = 'block';
+            sendMessage();
         }
     }
 
-    // 4. JOGAR ATÉ ÀS 00:30
-    function runClock() {
-        setTimeout(() => phoneContent("A jogar... <br> 00:15 <br> [||||||||||]"), 2000);
+    function sendMessage() {
+        const chat = document.getElementById('chat-box');
+        chat.innerHTML = "<b>Tu:</b> O meu PC deu erro...<br>";
         setTimeout(() => {
-            phoneContent("00:30 <br> MENSAGEM: 'EU ESTOU AQUI'");
-            alert("O que foi isto?!");
-            phone.classList.add('dropped');
-            sticker.style.display = 'block';
-            idCard.style.display = 'block';
-            blueScreen.style.display = 'none';
-            
-            // PC DESTRAVA
-            pcScreen.innerHTML = `
-                <div style="background:#000; padding:20px; border:2px solid #555;">
-                    <p>SISTEMA REINICIADO</p>
-                    <input type="text" id="pc-admin-pass" placeholder="Código Admin">
-                    <button class="btn" onclick="unlockPC()">ENTRAR</button>
-                </div>
-            `;
-        }, 4000);
-    }
-
-    // 5. VOLTAR AO PC (CÓDIGO 4055)
-    function unlockPC() {
-        const pass = document.getElementById('pc-admin-pass').value;
-        if(pass === "4055") {
-            pcScreen.style.display = 'none';
-            pcDesktop.style.display = 'block';
-        }
-    }
-
-    function openSecretApp() {
-        document.getElementById('secret-app').style.display = 'block';
-    }
-
-    // 6. ANO NASCIMENTO (1978)
-    function checkBirthYear() {
-        const pass = document.getElementById('pc-pass-2').value;
-        if(pass === "1978") {
-            document.getElementById('secret-app').style.display = 'none';
-            document.getElementById('files-list').style.display = 'block';
-        }
-    }
-
-    // 7. GOLPES.EXE (1995)
-    function openGolpes() {
-        const pass = prompt("Ficheiro Encriptado. Introduza o ano de criação da App:");
-        if(pass === "1995") {
-            document.getElementById('error-overlay').style.display = 'block';
+            chat.innerHTML += "<span style='color:red'>ERRO: Amigo indisponível.</span><br>";
             setTimeout(() => {
-                // FIM DO JOGO
-                document.getElementById('jumpscare').style.display = 'flex';
-                setTimeout(() => {
-                    document.body.innerHTML = "<h1 style='color:red; text-align:center; width:100%'>TU DESMAIASTE...</h1>";
-                }, 2000);
-            }, 1000);
+                chat.innerHTML = "<i>Aplicação desinstalada pelo sistema.</i>";
+                document.getElementById('game-mobile').style.display = 'block';
+                alert("A aplicação de mensagens sumiu! Vou ver os contactos para pistas.");
+                // DICA CONTACTOS
+                console.log("Dica: Contacto Desconhecido = 0105");
+                const contactsLink = document.createElement('p');
+                contactsLink.innerHTML = "Contactos (1): Desconhecido - 0105";
+                contactsLink.style.fontSize = "10px";
+                document.getElementById('phone-apps').appendChild(contactsLink);
+            }, 1500);
+        }, 1500);
+    }
+
+    function playMobile(e) {
+        e.stopPropagation();
+        if (document.getElementById('game-pass').value === "0105") {
+            let time = 0;
+            const timer = setInterval(() => {
+                time += 5;
+                document.getElementById('clock').innerText = `00:${time < 10 ? '0'+time : time}`;
+                if (time >= 30) {
+                    clearInterval(timer);
+                    triggerSusto();
+                }
+            }, 500);
         }
     }
 
-    function phoneContent(html) {
-        document.getElementById('phone-content').innerHTML = html;
+    function triggerSusto() {
+        document.getElementById('chat-box').innerHTML = "<b style='color:red'>Amigo: EU ESTOU A OLHAR PARA TI</b>";
+        setTimeout(() => {
+            smartphone.classList.remove('on-hand');
+            smartphone.classList.add('dropped');
+            alert("O QUÊ?! (O telemóvel caiu da tua mão!)");
+            document.getElementById('bsod-layer').style.display = 'none';
+            document.getElementById('desktop-layer').style.display = 'block';
+            document.getElementById('sticker').style.display = 'block';
+            document.getElementById('id-card').style.display = 'block';
+        }, 1000);
+    }
+
+    // VOLTAR AO PC
+    function checkPCCode() {
+        if (document.getElementById('pc-code').value === "4055") {
+            document.getElementById('admin-login').style.display = 'none';
+            document.getElementById('pc-icons').style.display = 'block';
+        }
+    }
+
+    function openApp() {
+        document.getElementById('app-window').style.display = 'block';
+    }
+
+    function checkBirth() {
+        if (document.getElementById('birth-year').value === "1978") {
+            document.getElementById('app-lock').style.display = 'none';
+            document.getElementById('app-files').style.display = 'block';
+        }
+    }
+
+    function openGolpes() {
+        const pass = prompt("Introduza a chave de criação (ver rodapé):");
+        if (pass === "1995") {
+            document.getElementById('screen').classList.add('glitch');
+            setTimeout(() => {
+                document.getElementById('jumpscare').style.display = 'flex';
+                // Som de susto (opcional se quiseres adicionar)
+                setTimeout(() => {
+                    document.body.innerHTML = "<div style='color:white; text-align:center; margin-top:20%'>SISTEMA CORROMPIDO. <br> O utilizador perdeu a consciência.</div>";
+                }, 2000);
+            }, 1500);
+        }
     }
 </script>
 
