@@ -2,351 +2,326 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <title>Sussurro Morto – Protótipo</title>
+  <title>Jogo 2D – Noite que se repete</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: Arial, sans-serif;
+      margin: 0;
       background: #050509;
       color: #f5f5f5;
+      font-family: Arial, sans-serif;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      min-height: 100vh;
+      justify-content: flex-start;
+      height: 100vh;
     }
-    .game {
-      width: 900px;
-      max-width: 100%;
-      background: #11131a;
-      border: 2px solid #333;
-      box-shadow: 0 0 20px #000;
-      display: grid;
-      grid-template-columns: 2fr 1.2fr;
-      gap: 0;
-    }
-    .left, .right {
-      padding: 16px;
-      border-left: 1px solid #222;
-    }
-    .left { border-left: none; border-right: 1px solid #222; }
-
     h1 {
+      margin: 10px 0 4px;
       font-size: 20px;
-      margin-bottom: 8px;
+      text-transform: uppercase;
       letter-spacing: 1px;
-      text-transform: uppercase;
     }
-    .subtitle {
+    .info {
       font-size: 12px;
       color: #aaa;
-      margin-bottom: 12px;
-    }
-
-    /* PC */
-    .pc {
-      background: #05060a;
-      border: 1px solid #333;
-      padding: 10px;
-      margin-bottom: 12px;
-    }
-    .pc-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
       margin-bottom: 8px;
-      color: #bbb;
+      text-align: center;
     }
-    .pc-screen {
-      background: #020308;
-      border: 1px solid #222;
-      height: 180px;
-      padding: 8px;
-      overflow-y: auto;
-      font-size: 13px;
+    canvas {
+      border: 2px solid #333;
+      background: #11131a;
+      box-shadow: 0 0 20px #000;
     }
-    .pc-apps {
+    .msg {
       margin-top: 8px;
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    button {
-      background: #1b1f2b;
-      color: #f5f5f5;
-      border: 1px solid #444;
-      padding: 4px 8px;
-      font-size: 12px;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    button:hover {
-      background: #252a3a;
-    }
-    button:disabled {
-      opacity: 0.4;
-      cursor: default;
-    }
-
-    /* Sala / casa */
-    .house {
-      margin-top: 10px;
-      border: 1px solid #333;
-      padding: 10px;
-      background: #0b0d13;
-    }
-    .house-rooms {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-    }
-    .room-label {
-      font-size: 12px;
-      color: #aaa;
-      margin-bottom: 4px;
-    }
-    .log {
-      margin-top: 8px;
-      background: #05060a;
-      border: 1px solid #222;
-      padding: 8px;
-      height: 120px;
-      overflow-y: auto;
-      font-size: 12px;
-    }
-    .log p { margin-bottom: 4px; }
-
-    /* Painel de história */
-    .right h2 {
-      font-size: 16px;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-    }
-    .story {
       font-size: 13px;
-      line-height: 1.4;
-      margin-bottom: 10px;
-      min-height: 120px;
+      text-align: center;
       white-space: pre-line;
+      max-width: 700px;
     }
-    .choices {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 6px;
-    }
-    .status {
-      margin-top: 12px;
-      font-size: 12px;
-      color: #aaa;
-    }
-    .highlight {
-      color: #ff4b4b;
-    }
-    .safe {
-      color: #6fdc6f;
-    }
+    .highlight { color: #ff4b4b; }
+    .safe { color: #6fdc6f; }
   </style>
 </head>
 <body>
-<div class="game">
-  <div class="left">
-    <h1>Sussurro Morto</h1>
-    <div class="subtitle">Protótipo – PC, casa e ciclo de perseguição</div>
-
-    <!-- PC -->
-    <div class="pc">
-      <div class="pc-header">
-        <span>PC – Área de Trabalho</span>
-        <span id="pc-status">Online</span>
-      </div>
-      <div class="pc-screen" id="pc-screen">
-        <p>O ecrã brilha numa sala quase às escuras.</p>
-        <p>Consegues sentir que não estás totalmente sozinho.</p>
-      </div>
-      <div class="pc-apps">
-        <button onclick="pcAction('mensagem')">Mensagens</button>
-        <button onclick="pcAction('jogar')">Jogar</button>
-        <button onclick="pcAction('falar')">Chamada</button>
-      </div>
-    </div>
-
-    <!-- Casa / divisões -->
-    <div class="house">
-      <div class="room-label">Divisões da casa</div>
-      <div class="house-rooms">
-        <button onclick="changeRoom('sala')">Sala</button>
-        <button onclick="changeRoom('cozinha')">Cozinha</button>
-        <button onclick="changeRoom('quarto')">Quarto</button>
-      </div>
-      <div class="log" id="house-log">
-        <p>Estás na sala, o PC está ligado. A casa está silenciosa.</p>
-      </div>
-    </div>
+  <h1>Noite que se repete</h1>
+  <div class="info">
+    Movimentação: WASD ou Setas · Interagir: E<br>
+    Explora a casa. Em algum momento, alguém vai bater à porta…
   </div>
-
-  <div class="right">
-    <h2>História</h2>
-    <div class="story" id="story">
-      É só mais uma noite normal.
-
-      Estás no PC, a saltar entre mensagens, jogos e chamadas.
-      Podes andar pela casa: sala, cozinha, quarto.
-
-      Em algum momento… alguém vai bater à porta.
-    </div>
-
-    <div class="choices" id="choices">
-      <button onclick="startKnock()">Avançar a noite</button>
-    </div>
-
-    <div class="status" id="status">
-      Estado: <span>À espera de algo acontecer…</span>
-    </div>
-  </div>
-</div>
+  <canvas id="game" width="700" height="400"></canvas>
+  <div class="msg" id="msg"></div>
 
 <script>
-  let currentRoom = 'sala';
-  let knockStarted = false;
-  let hidingPhase = false;
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const msgEl = document.getElementById('msg');
 
-  const pcScreen = document.getElementById('pc-screen');
-  const houseLog = document.getElementById('house-log');
-  const story = document.getElementById('story');
-  const choices = document.getElementById('choices');
-  const statusEl = document.getElementById('status').querySelector('span');
+const keys = {};
+window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; });
+window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
-  function logPc(text) {
-    pcScreen.innerHTML += `<p>${text}</p>`;
-    pcScreen.scrollTop = pcScreen.scrollHeight;
-  }
+const ROOM = {
+  SALA: 'sala',
+  COZINHA: 'cozinha',
+  QUARTO: 'quarto'
+};
 
-  function logHouse(text) {
-    houseLog.innerHTML += `<p>${text}</p>`;
-    houseLog.scrollTop = houseLog.scrollHeight;
-  }
+let state = 'normal'; // normal, knock, chase, result
+let currentRoom = ROOM.SALA;
+let knockTimer = 0;
+let enemyActive = false;
 
-  function pcAction(type) {
-    if (hidingPhase) {
-      logPc('Agora não é altura para isso. Há alguém na casa.');
-      return;
+const player = { x: 120, y: 180, w: 16, h: 16, speed: 2.2 };
+const enemy = { x: 600, y: 200, w: 18, h: 18, speed: 1.8 };
+
+const door = { x: 650, y: 150, w: 30, h: 80 }; // porta na sala
+const pcDesk = { x: 40, y: 60, w: 80, h: 40 }; // PC na sala
+
+// Objetos do quarto
+const bed = { x: 420, y: 70, w: 120, h: 40 };
+const wardrobe = { x: 80, y: 60, w: 40, h: 90 };
+
+// Portas entre divisões (simplificado)
+const doorToCozinha = { x: 340, y: 0, w: 40, h: 10 }; // topo sala -> cozinha
+const doorToSalaFromCozinha = { x: 340, y: 390, w: 40, h: 10 }; // baixo cozinha -> sala
+const doorToQuarto = { x: 340, y: 390, w: 40, h: 10 }; // baixo sala -> quarto
+const doorToSalaFromQuarto = { x: 340, y: 0, w: 40, h: 10 }; // topo quarto -> sala
+
+function resetNight(message) {
+  state = 'normal';
+  currentRoom = ROOM.SALA;
+  player.x = 120;
+  player.y = 180;
+  enemyActive = false;
+  knockTimer = 0;
+  if (message) msgEl.innerHTML = message;
+  else msgEl.textContent = 'É outra vez a mesma noite. O PC está ligado na sala.';
+}
+
+resetNight('Explora a casa. Em algum momento, alguém vai bater à porta…');
+
+function update() {
+  handleInput();
+  if (state === 'normal') {
+    knockTimer += 1;
+    if (knockTimer > 60 * 8) { // ~8 segundos
+      startKnock();
     }
-    if (type === 'mensagem') {
-      logPc('Abres a app de mensagens. Ninguém responde. Última mensagem tua: "Acho que ouvi algo na escada."');
-    } else if (type === 'jogar') {
-      logPc('Tentaste jogar, mas o som de passos no corredor não te deixa concentrar.');
-    } else if (type === 'falar') {
-      logPc('Inicias uma chamada. A ligação cai assim que alguém bate à porta.');
-      if (!knockStarted) startKnock();
+  } else if (state === 'chase' && enemyActive) {
+    moveEnemy();
+  }
+}
+
+function handleInput() {
+  let dx = 0, dy = 0;
+  if (keys['w'] || keys['arrowup']) dy -= 1;
+  if (keys['s'] || keys['arrowdown']) dy += 1;
+  if (keys['a'] || keys['arrowleft']) dx -= 1;
+  if (keys['d'] || keys['arrowright']) dx += 1;
+
+  const len = Math.hypot(dx, dy) || 1;
+  dx = dx / len * player.speed;
+  dy = dy / len * player.speed;
+
+  player.x += dx;
+  player.y += dy;
+
+  // Limites da sala
+  if (player.x < 10) player.x = 10;
+  if (player.y < 10) player.y = 10;
+  if (player.x + player.w > canvas.width - 10) player.x = canvas.width - 10 - player.w;
+  if (player.y + player.h > canvas.height - 10) player.y = canvas.height - 10 - player.h;
+
+  // Troca de divisões
+  if (currentRoom === ROOM.SALA && overlap(player, doorToCozinha) && player.y < 20) {
+    currentRoom = ROOM.COZINHA;
+    player.y = canvas.height - 40;
+    msgEl.textContent = 'Estás na cozinha. O silêncio é pesado.';
+  } else if (currentRoom === ROOM.COZINHA && overlap(player, doorToSalaFromCozinha) && player.y + player.h > canvas.height - 20) {
+    currentRoom = ROOM.SALA;
+    player.y = 40;
+    msgEl.textContent = 'Voltaste à sala. O PC continua ligado.';
+  }
+
+  if (currentRoom === ROOM.SALA && overlap(player, doorToQuarto) && player.y + player.h > canvas.height - 20) {
+    currentRoom = ROOM.QUARTO;
+    player.y = 40;
+    msgEl.textContent = 'Estás no quarto. Há uma cama e um armário.';
+  } else if (currentRoom === ROOM.QUARTO && overlap(player, doorToSalaFromQuarto) && player.y < 20) {
+    currentRoom = ROOM.SALA;
+    player.y = canvas.height - 40;
+    msgEl.textContent = 'Voltaste à sala.';
+  }
+
+  // Interações
+  if (keys['e']) {
+    if (state === 'normal') {
+      if (currentRoom === ROOM.SALA && overlap(player, pcDesk)) {
+        msgEl.textContent = 'Mexes no PC: mensagens, jogos, chamadas… mas algo não parece certo.';
+      }
+    } else if (state === 'chase') {
+      if (currentRoom === ROOM.QUARTO) {
+        if (overlap(player, wardrobe)) {
+          resolveHiding('armario');
+        } else if (overlap(player, bed)) {
+          resolveHiding('cama');
+        }
+      }
     }
   }
+}
 
-  function changeRoom(room) {
-    currentRoom = room;
-    if (room === 'sala') {
-      logHouse('Vais para a sala. O PC continua ligado, a luz azul corta a escuridão.');
-    } else if (room === 'cozinha') {
-      logHouse('Vais para a cozinha. O frigorífico faz um zumbido baixo. A casa parece vazia… demais.');
-    } else if (room === 'quarto') {
-      logHouse('Vais para o quarto. A cama, o armário e a janela fechada esperam em silêncio.');
-    }
+function startKnock() {
+  state = 'knock';
+  msgEl.innerHTML = 'Um som seco ecoa pela casa.<br>Alguém bate à porta.';
+  // Força o jogador a ir para o quarto (tu decides, mas aqui é “lore”)
+  setTimeout(() => {
+    msgEl.innerHTML += '<br>Instintivamente, decides ir para o quarto.';
+    currentRoom = ROOM.QUARTO;
+    player.x = 200;
+    player.y = 250;
+    startChase();
+  }, 2000);
+}
+
+function startChase() {
+  state = 'chase';
+  enemyActive = true;
+  enemy.x = 340;
+  enemy.y = 20;
+  msgEl.innerHTML = 'Os passos entram em casa. Tens poucos segundos para te esconder.<br><span class="highlight">Esconde-te no armário ou debaixo da cama (E).</span>';
+}
+
+function moveEnemy() {
+  if (currentRoom !== ROOM.QUARTO) return;
+  const dx = player.x - enemy.x;
+  const dy = player.y - enemy.y;
+  const len = Math.hypot(dx, dy) || 1;
+  enemy.x += (dx / len) * enemy.speed;
+  enemy.y += (dy / len) * enemy.speed;
+
+  if (overlap(player, enemy)) {
+    resolveCaught();
   }
+}
 
-  function startKnock() {
-    knockStarted = true;
-    hidingPhase = false;
-    story.textContent =
-`Um som seco ecoa pela casa.
-
-Alguém bate à porta.
-
-O ar fica pesado. O PC continua ligado na sala, mas o som vem do corredor.
-
-Instintivamente, decides ir para o quarto.`;
-    changeRoom('quarto');
-    statusEl.textContent = 'Alguém está à porta…';
-    renderHidingChoices();
+function resolveHiding(local) {
+  state = 'result';
+  enemyActive = false;
+  if (local === 'armario') {
+    msgEl.innerHTML =
+      'Fechas-te dentro do armário, a respiração presa.\n' +
+      'Os passos aproximam-se, param mesmo à frente da porta do quarto…\n' +
+      'A maçaneta mexe, mas não abre.\n' +
+      '<span class="safe">Sobrevives. A noite recomece.</span>';
+  } else {
+    msgEl.innerHTML =
+      'Atiras-te para debaixo da cama.\n' +
+      'Vês apenas pés imóveis ao lado da cama.\n' +
+      'A colcha levanta devagar.\n' +
+      '<span class="highlight">Foste encontrado. A noite repete.</span>';
   }
+  setTimeout(() => resetNight(msgEl.innerHTML), 3500);
+}
 
-  function renderHidingChoices() {
-    hidingPhase = true;
-    choices.innerHTML = '';
-    const btnArmario = document.createElement('button');
-    btnArmario.textContent = 'Esconder no armário';
-    btnArmario.onclick = () => resolveHiding('armario');
+function resolveCaught() {
+  state = 'result';
+  enemyActive = false;
+  msgEl.innerHTML =
+    'Não tiveste tempo de te esconder.\n' +
+    '<span class="highlight">Ele encontrou-te. A noite repete.</span>';
+  setTimeout(() => resetNight(msgEl.innerHTML), 3000);
+}
 
-    const btnCama = document.createElement('button');
-    btnCama.textContent = 'Esconder debaixo da cama';
-    btnCama.onclick = () => resolveHiding('cama');
+function overlap(a, b) {
+  return a.x < b.x + b.w &&
+         a.x + a.w > b.x &&
+         a.y < b.y + b.h &&
+         a.y + a.h > b.y;
+}
 
-    choices.appendChild(btnArmario);
-    choices.appendChild(btnCama);
+function drawRoom() {
+  ctx.fillStyle = '#11131a';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // paredes
+  ctx.strokeStyle = '#444';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(8, 8, canvas.width - 16, canvas.height - 16);
+
+  ctx.fillStyle = '#888';
+  ctx.font = '14px Arial';
+  ctx.fillText(
+    currentRoom === ROOM.SALA ? 'Sala' :
+    currentRoom === ROOM.COZINHA ? 'Cozinha' : 'Quarto',
+    20, 26
+  );
+
+  if (currentRoom === ROOM.SALA) {
+    // PC
+    ctx.fillStyle = '#222';
+    ctx.fillRect(pcDesk.x, pcDesk.y, pcDesk.w, pcDesk.h);
+    ctx.fillStyle = '#0af';
+    ctx.fillRect(pcDesk.x + 8, pcDesk.y + 6, pcDesk.w - 16, pcDesk.h - 16);
+    ctx.fillStyle = '#ccc';
+    ctx.fillText('PC', pcDesk.x + 24, pcDesk.y + 26);
+
+    // porta de entrada
+    ctx.fillStyle = '#663300';
+    ctx.fillRect(door.x, door.y, door.w, door.h);
+    ctx.fillStyle = '#222';
+    ctx.fillText('Porta', door.x - 4, door.y - 6);
+
+    // portas para outras divisões (linhas)
+    ctx.fillStyle = '#555';
+    ctx.fillRect(doorToCozinha.x, doorToCozinha.y, doorToCozinha.w, doorToCozinha.h);
+    ctx.fillRect(doorToQuarto.x, doorToQuarto.y, doorToQuarto.w, doorToQuarto.h);
+  } else if (currentRoom === ROOM.COZINHA) {
+    ctx.fillStyle = '#444';
+    ctx.fillRect(80, 60, 120, 40); // balcão
+    ctx.fillStyle = '#999';
+    ctx.fillText('Balcão', 90, 85);
+    ctx.fillStyle = '#555';
+    ctx.fillRect(doorToSalaFromCozinha.x, doorToSalaFromCozinha.y, doorToSalaFromCozinha.w, doorToSalaFromCozinha.h);
+  } else if (currentRoom === ROOM.QUARTO) {
+    // cama
+    ctx.fillStyle = '#444';
+    ctx.fillRect(bed.x, bed.y, bed.w, bed.h);
+    ctx.fillStyle = '#bbb';
+    ctx.fillText('Cama', bed.x + 40, bed.y + 26);
+
+    // armário
+    ctx.fillStyle = '#553311';
+    ctx.fillRect(wardrobe.x, wardrobe.y, wardrobe.w, wardrobe.h);
+    ctx.fillStyle = '#ddd';
+    ctx.fillText('Armário', wardrobe.x - 4, wardrobe.y - 6);
+
+    ctx.fillStyle = '#555';
+    ctx.fillRect(doorToSalaFromQuarto.x, doorToSalaFromQuarto.y, doorToSalaFromQuarto.w, doorToSalaFromQuarto.h);
   }
+}
 
-  function resolveHiding(local) {
-    if (local === 'armario') {
-      story.textContent =
-`Corres para o armário e fechas a porta com cuidado.
+function drawPlayer() {
+  ctx.fillStyle = '#0f0';
+  ctx.fillRect(player.x, player.y, player.w, player.h);
+}
 
-Os passos aproximam-se. O chão range mesmo à frente do quarto.
+function drawEnemy() {
+  if (!enemyActive || currentRoom !== ROOM.QUARTO) return;
+  ctx.fillStyle = '#f00';
+  ctx.fillRect(enemy.x, enemy.y, enemy.w, enemy.h);
+}
 
-A maçaneta roda devagar… mas a porta não abre.
+function loop() {
+  update();
+  drawRoom();
+  drawPlayer();
+  drawEnemy();
+  requestAnimationFrame(loop);
+}
 
-Depois de alguns segundos que parecem horas, o som afasta-se.
-
-Sobrevives. Por agora.
-
-A noite recomeça.`;
-      statusEl.innerHTML = '<span class="safe">Sobreviveste. O ciclo repete.</span>';
-    } else {
-      story.textContent =
-`Atiras-te para debaixo da cama, a respiração presa na garganta.
-
-Os passos entram no quarto. Vês apenas pés imóveis ao lado da cama.
-
-O silêncio dura tempo demais.
-
-A colcha levanta devagar.
-
-Não tiveste tempo de reagir.
-
-A cena repete.`;
-      statusEl.innerHTML = '<span class="highlight">Foste encontrado. O ciclo recomeça.</span>';
-    }
-
-    // Reiniciar ciclo
-    choices.innerHTML = '';
-    const restartBtn = document.createElement('button');
-    restartBtn.textContent = 'Repetir noite';
-    restartBtn.onclick = resetNight;
-    choices.appendChild(restartBtn);
-
-    knockStarted = false;
-    hidingPhase = false;
-  }
-
-  function resetNight() {
-    story.textContent =
-`É outra vez a mesma noite.
-
-O PC está ligado na sala.
-Podes mexer no PC, andar pela casa…
-
-Mas sabes que, mais cedo ou mais tarde, alguém vai bater à porta.`;
-    statusEl.textContent = 'À espera de algo acontecer…';
-    choices.innerHTML = '';
-    const btn = document.createElement('button');
-    btn.textContent = 'Avançar a noite';
-    btn.onclick = startKnock;
-    choices.appendChild(btn);
-
-    currentRoom = 'sala';
-    houseLog.innerHTML = '<p>Estás na sala, o PC está ligado. A casa está silenciosa.</p>';
-    pcScreen.innerHTML = '<p>O ecrã brilha numa sala quase às escuras.</p><p>Consegues sentir que não estás totalmente sozinho.</p>';
-  }
+loop();
 </script>
 </body>
 </html>
